@@ -44,6 +44,8 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #FBF9F5;
+            height: 100dvh;
+            overflow-x: hidden;
             background-image: radial-gradient(ellipse 90% 55% at 50% 0%, #FBF6EE 0%, #FBF9F5 55%, #F9F6EF 100%);
             color: #3D3833;
             line-height: 1.5;
@@ -742,27 +744,23 @@ html.np-motion main > section:first-of-type.is-visible .grid > .claude-card:nth-
       <i class="fa-solid fa-expand"></i>
     </button>
 
-    <!-- SCRIPT SCHERMO INTERO -->
+        <!-- SCRIPT NASCONDI BARRA (Senza avvisi) -->
     <script>
       (function () {
         'use strict';
-        var el = document.documentElement;
-        var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-        var exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
         
         var prompt = document.getElementById('fullscreenPrompt');
         var btnAllow = document.getElementById('btnAllowFullscreen');
         var btnSkip = document.getElementById('btnSkipFullscreen');
         var btnFloat = document.getElementById('btnFloatFullscreen');
 
-        // Se il browser non supporta l'API, nascondi tutto
-        if (!req) {
-          prompt.style.display = 'none';
-          return;
-        }
-
-        function isFullscreen() {
-          return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+        // Funzione che fa lo scroll di 1 pixel per nascondere la barra di Chrome
+        function hideChromeBar() {
+          window.scrollTo(0, 1);
+          // Un secondo tentativo dopo un istante per sicurezza
+          setTimeout(function() {
+            window.scrollTo(0, 1);
+          }, 100);
         }
 
         function hidePrompt() {
@@ -770,62 +768,27 @@ html.np-motion main > section:first-of-type.is-visible .grid > .claude-card:nth-
           setTimeout(function() { prompt.style.display = 'none'; }, 300);
         }
 
-        function showPrompt() {
-          prompt.style.display = 'flex';
-          // Forza reflow
-          void prompt.offsetWidth;
-          prompt.style.opacity = '1';
-        }
+        // Click su "Consenti"
+        btnAllow.addEventListener('click', function () {
+          hideChromeBar();
+          hidePrompt();
+        });
 
-        function toggleFloatBtn() {
-          if (isFullscreen()) {
-            btnFloat.classList.add('opacity-0', 'pointer-events-none');
-            btnFloat.classList.remove('opacity-100', 'pointer-events-auto');
-          } else {
-            btnFloat.classList.remove('opacity-0', 'pointer-events-none');
-            btnFloat.classList.add('opacity-100', 'pointer-events-auto');
-          }
-        }
-
-        function goFullscreen() {
-          var promise = req.call(el, { navigationUI: 'hide' });
-          if (promise && promise.then) {
-            promise.then(function () {
-              if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('portrait').catch(function () {});
-              }
-              hidePrompt();
-            }).catch(function () {
-              // Se fallisce (es. iOS), chiudi il popup per non bloccare
-              hidePrompt();
-              btnFloat.classList.remove('opacity-0', 'pointer-events-none');
-              btnFloat.classList.add('opacity-100', 'pointer-events-auto');
-            });
-          } else {
-            hidePrompt();
-          }
-        }
-
-        btnAllow.addEventListener('click', goFullscreen);
-        
+        // Click su "Continua senza"
         btnSkip.addEventListener('click', function () {
           hidePrompt();
+          // Mostra il pulsante flottante in basso a destra se l'utente vuole attivarlo dopo
           btnFloat.classList.remove('opacity-0', 'pointer-events-none');
           btnFloat.classList.add('opacity-100', 'pointer-events-auto');
         });
 
-        btnFloat.addEventListener('click', goFullscreen);
+        // Click sul pulsante flottante
+        btnFloat.addEventListener('click', function() {
+          hideChromeBar();
+          btnFloat.classList.add('opacity-0', 'pointer-events-none');
+          btnFloat.classList.remove('opacity-100', 'pointer-events-auto');
+        });
 
-        // Ascolta i cambiamenti di stato (es. se l'utente esce dal fullscreen)
-        document.addEventListener('fullscreenchange', toggleFloatBtn);
-        document.addEventListener('webkitfullscreenchange', toggleFloatBtn);
-        document.addEventListener('mozfullscreenchange', toggleFloatBtn);
-        document.addEventListener('MSFullscreenChange', toggleFloatBtn);
-
-        // Se è già in fullscreen al caricamento (es. refresh), nascondi il popup
-        if (isFullscreen()) {
-          hidePrompt();
-        }
       })();
     </script>
     <!-- TOP NAVIGATION -->
