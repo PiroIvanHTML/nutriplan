@@ -44,7 +44,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #FBF9F5;
-            min-height: 100dvh;
+            min-height: calc(100dvh + 10px);
             overflow-x: hidden;
             background-image: radial-gradient(ellipse 90% 55% at 50% 0%, #FBF6EE 0%, #FBF9F5 55%, #F9F6EF 100%);
             color: #3D3833;
@@ -744,7 +744,7 @@ html.np-motion main > section:first-of-type.is-visible .grid > .claude-card:nth-
       <i class="fa-solid fa-expand"></i>
     </button>
 
-            <!-- SCRIPT NASCONDI BARRA (Senza avvisi) -->
+                <!-- SCRIPT NASCONDI BARRA (Senza avvisi) -->
     <script>
       (function () {
         'use strict';
@@ -755,13 +755,12 @@ html.np-motion main > section:first-of-type.is-visible .grid > .claude-card:nth-
         var btnFloat = document.getElementById('btnFloatFullscreen');
 
         function hideChromeBar() {
-          // Diamo il tempo al browser di chiudere il popup e assestare il layout
+          // Diamo 100ms di tempo al browser per chiudere il popup
           setTimeout(function() {
-            // Forza lo scroll di 1 pixel in vari modi per ingannare Chrome
             window.scrollTo(0, 1);
-            document.body.scrollTop = 1;
             document.documentElement.scrollTop = 1;
-          }, 150); // 150 millisecondi di attesa sono la chiave
+            document.body.scrollTop = 1;
+          }, 100);
         }
 
         function hidePrompt() {
