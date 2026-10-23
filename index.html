@@ -716,6 +716,22 @@ html.np-motion main > section:first-of-type.is-visible .grid > .claude-card:nth-
     <!-- END NUTRIPLAN PREMIUM: SOLO GRAFICA A SCHERMO -->
 </head>
   <body class="min-h-screen antialiased">
+    <!-- SCRIPT REINDIRIZZAMENTO A CHROME DA WHATSAPP -->
+    <script>
+      (function () {
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        var isAndroid = /android/i.test(userAgent);
+        var isInApp = /FBAN|FBAV|Instagram|WhatsApp|Line|Twitter|Snapchat/i.test(userAgent);
+
+        if (isAndroid && isInApp && !sessionStorage.getItem('redirected_to_chrome')) {
+          sessionStorage.setItem('redirected_to_chrome', 'true');
+          var currentUrl = window.location.href;
+          var urlSenzaProtocollo = currentUrl.replace('https://', '').replace('http://', '');
+          var intentUrl = 'intent://' + urlSenzaProtocollo + '#Intent;scheme=https;package=com.android.chrome;end;';
+          window.location.href = intentUrl;
+        }
+      })();
+    </script>
     <!-- POPUP SCHERMO INTERO (stile NutriPlan) -->
     <div id="fullscreenPrompt" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-claude-bg/95 backdrop-blur-md transition-opacity duration-300">
       <div class="bg-claude-card border border-claude-cardBorder rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl space-y-5 animate-[np-panel-in_0.4s_ease-out]">
