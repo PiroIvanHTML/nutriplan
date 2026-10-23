@@ -44,8 +44,6 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #FBF9F5;
-            height: 100dvh;
-            overflow-x: hidden;
             background-image: radial-gradient(ellipse 90% 55% at 50% 0%, #FBF6EE 0%, #FBF9F5 55%, #F9F6EF 100%);
             color: #3D3833;
             line-height: 1.5;
@@ -716,6 +714,120 @@ html.np-motion main > section:first-of-type.is-visible .grid > .claude-card:nth-
     <!-- END NUTRIPLAN PREMIUM: SOLO GRAFICA A SCHERMO -->
 </head>
   <body class="min-h-screen antialiased">
+    <!-- POPUP SCHERMO INTERO (stile NutriPlan) -->
+    <div id="fullscreenPrompt" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-claude-bg/95 backdrop-blur-md transition-opacity duration-300">
+      <div class="bg-claude-card border border-claude-cardBorder rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl space-y-5 animate-[np-panel-in_0.4s_ease-out]">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-claude-terracotta/10 text-claude-terracotta flex items-center justify-center text-2xl">
+          <i class="fa-solid fa-expand"></i>
+        </div>
+        <div class="space-y-2">
+          <h2 class="font-heading text-xl font-bold text-claude-text">Modalità Schermo Intero</h2>
+          <p class="text-sm text-claude-muted leading-relaxed">
+            Per goderti al meglio il tuo piano alimentare, quello stronzo di Ivan ti consiglia di attivare la modalità schermo intero. Nasconderà le barre del browser per un'esperienza più pulita e simile a un'app.
+          </p>
+        </div>
+        <div class="space-y-3 pt-1">
+          <button id="btnAllowFullscreen" class="w-full h-12 rounded-xl bg-claude-terracotta hover:bg-claude-terracottaHover text-white font-bold text-sm transition-all duration-200 shadow-sm active:scale-95 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-expand"></i> Consenti
+          </button>
+          <button id="btnSkipFullscreen" class="w-full h-10 rounded-xl text-xs font-semibold text-claude-muted hover:text-claude-text hover:bg-claude-sand/50 transition-all duration-200 active:scale-95">
+            Continua senza e fai come cazzo ti pare
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PULSANTE FLOTTANTE PER RIATTIVARE (nascosto di default) -->
+    <button id="btnFloatFullscreen" class="fixed bottom-4 right-4 z-[9998] w-11 h-11 rounded-full bg-claude-card border border-claude-cardBorder shadow-lg text-claude-terracotta hover:text-claude-terracottaHover flex items-center justify-center text-lg transition-all duration-300 opacity-0 pointer-events-none active:scale-95" title="Attiva schermo intero">
+      <i class="fa-solid fa-expand"></i>
+    </button>
+
+    <!-- SCRIPT SCHERMO INTERO -->
+    <script>
+      (function () {
+        'use strict';
+        var el = document.documentElement;
+        var req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+        var exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        
+        var prompt = document.getElementById('fullscreenPrompt');
+        var btnAllow = document.getElementById('btnAllowFullscreen');
+        var btnSkip = document.getElementById('btnSkipFullscreen');
+        var btnFloat = document.getElementById('btnFloatFullscreen');
+
+        // Se il browser non supporta l'API, nascondi tutto
+        if (!req) {
+          prompt.style.display = 'none';
+          return;
+        }
+
+        function isFullscreen() {
+          return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+        }
+
+        function hidePrompt() {
+          prompt.style.opacity = '0';
+          setTimeout(function() { prompt.style.display = 'none'; }, 300);
+        }
+
+        function showPrompt() {
+          prompt.style.display = 'flex';
+          // Forza reflow
+          void prompt.offsetWidth;
+          prompt.style.opacity = '1';
+        }
+
+        function toggleFloatBtn() {
+          if (isFullscreen()) {
+            btnFloat.classList.add('opacity-0', 'pointer-events-none');
+            btnFloat.classList.remove('opacity-100', 'pointer-events-auto');
+          } else {
+            btnFloat.classList.remove('opacity-0', 'pointer-events-none');
+            btnFloat.classList.add('opacity-100', 'pointer-events-auto');
+          }
+        }
+
+        function goFullscreen() {
+          var promise = req.call(el, { navigationUI: 'hide' });
+          if (promise && promise.then) {
+            promise.then(function () {
+              if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('portrait').catch(function () {});
+              }
+              hidePrompt();
+            }).catch(function () {
+              // Se fallisce (es. iOS), chiudi il popup per non bloccare
+              hidePrompt();
+              btnFloat.classList.remove('opacity-0', 'pointer-events-none');
+              btnFloat.classList.add('opacity-100', 'pointer-events-auto');
+            });
+          } else {
+            hidePrompt();
+          }
+        }
+
+        btnAllow.addEventListener('click', goFullscreen);
+        
+        btnSkip.addEventListener('click', function () {
+          hidePrompt();
+          btnFloat.classList.remove('opacity-0', 'pointer-events-none');
+          btnFloat.classList.add('opacity-100', 'pointer-events-auto');
+        });
+
+        btnFloat.addEventListener('click', goFullscreen);
+
+        // Ascolta i cambiamenti di stato (es. se l'utente esce dal fullscreen)
+        document.addEventListener('fullscreenchange', toggleFloatBtn);
+        document.addEventListener('webkitfullscreenchange', toggleFloatBtn);
+        document.addEventListener('mozfullscreenchange', toggleFloatBtn);
+        document.addEventListener('MSFullscreenChange', toggleFloatBtn);
+
+        // Se è già in fullscreen al caricamento (es. refresh), nascondi il popup
+        if (isFullscreen()) {
+          hidePrompt();
+        }
+      })();
+    </script>
     <!-- TOP NAVIGATION -->
     <nav class="sticky top-0 z-50 bg-[#FBF9F5]/90 backdrop-blur-md border-b border-claude-cardBorder no-print">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -1534,14 +1646,5 @@ html.np-motion main > section:first-of-type.is-visible .grid > .claude-card:nth-
 
     </script>
     <!-- END NUTRIPLAN PREMIUM: EFFETTI ISOLATI -->
-    <!-- SCRIPT FINTO SCHERMO INTERO (Senza avvisi) -->
-    <script>
-      window.addEventListener('load', function() {
-        // Aspetta un attimo che la pagina si carichi e scatta di 1 pixel verso l'alto
-        setTimeout(function() {
-          window.scrollTo(0, 1);
-        }, 200);
-      });
-    </script>
 </body>
 </html>
